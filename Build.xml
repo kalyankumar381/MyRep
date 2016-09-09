@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Cucumber" default="usage" basedir=".">
+
+	<property environment="env"></property>
+	
+	<property name="ws.home" value="${basedir}" />
+	<property name="ws.jars" value="D:\Cucumber\jars" />
+	<property name="test.dest" value="${ws.home}/build" />
+	<property name="test.src" value="${ws.home}/src" />
+	
+	<path id="testcase.path">
+		<pathelement location="${test.dest}" />
+		<fileset dir="${ws.jars}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	
+	<target name="setClassPath" unless="test.classpath">
+		<path id="classpath_jars">
+			<fileset dir="${ws.jars}" includes="*.jar"/>			
+		</path>
+		<pathconvert pathsep=":"
+			property="test.classpath"
+			refid="classpath_jars"/>
+	</target>
+
+	<target name="init" depends="setClassPath">
+		<tstamp>
+			<format property="start.time" pattern="MM/dd/yyyy h"/>
+		</tstamp>
+		<condition property="ANT"
+			value="${env.ANT_HOME}/bin/ant.bat"
+			else="${env.ANT_HOME}/bin/ant">
+				<os family="windows" />
+		</condition>
+		
+	</target>
+
+	
+	<target name="all">
+	</target>
+	
+	<target name="clean">
+		<delete dir="${test.dest}"/>
+	</target>
+	
+	<!-- compile -->
+	<target name="compile" depends="clean">
+		<mkdir dir="${test.dest}"/>
+		<javac srcdir="${test.src}" destdir="${test.dest}" classpath="jarfile" debug="on">
+			<classpath>
+						<pathelement path="${bin}">
+						</pathelement>
+						<fileset dir="${ws.jars}">
+							<include name="*.jar" />
+						</fileset>
+			</classpath>
+		</javac>
+	  <copy file="src\log4j.properties" todir="build"/>	
+	</target>
+
+	<!-- build -->
+		<target name="build" depends="init">
+		</target>
+
+	<target name="usage">
+		<echo>
+			ant run will execute the test
+		</echo>
+	</target>
+	
+	<path id="test.c">
+		<fileset dir="${ws.jars}" includes="*.jar"/>
+	</path> 
+	
+	 <target name="runcukes" depends="compile">
+		        <mkdir dir="target/cucumber-junit-report"/>
+		        <java classname="cucumber.api.cli.Main" fork="true" failonerror="false" resultproperty="cucumber.exitstatus">
+		            <classpath refid="testcase.path"/>
+		            <arg value="--plugin"/>
+		            <arg value="junit:target/cucumber-junit-report/allucke.xml"/>
+		            <arg value="--plugin"/>
+		            <arg value="pretty"/>
+		            <arg value="--plugin"/>
+		            <arg value="html:target/cucumber-html-report"/>
+		        	<arg value="--tags"/>
+		        	<arg value="@tester,@linuxDev,@javaDev"/>
+		            <arg value="--glue"/>
+		            <arg value="com/learning/cucumber"/>
+		            <arg value="src/com/learning/cucumber/resource"/>
+		        </java>	 
+	
+	        <junitreport todir="target/cucumber-junit-report">
+	            <fileset dir="target/cucumber-junit-report">
+	                <include name="allcukes.xml"/>
+	            </fileset>
+	            <report format="frames" todir="target/cucumber-junit-report/html"/>
+	        </junitreport>
+	 	</target>
+	
+	
+	
+	
+</project>
